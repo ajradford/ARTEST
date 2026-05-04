@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acumen BI — Health Sector Capabilities</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+
+    /* === THEME: ACUMEN DARK (A1) — Brand Guidelines v5.1 === */
+    :root {
+      --bg-primary:    #061626;               /* Midnight Navy */
+      --accent-green:  #6A9E39;               /* Top bar, CTAs — non-negotiable */
+      --accent-teal:   #1F798C;               /* Labels, subheadings, card bar 1 */
+      --accent-brass:  #B5892A;               /* Callouts, metrics, card bar 2 */
+      --accent-rose:   #8C5470;               /* Card bar 3, highlights */
+      --text-heading:  #ffffff;
+      --text-sub:      rgba(255,255,255,0.55);
+      --text-body:     rgba(255,255,255,0.40);
+      --text-caption:  rgba(255,255,255,0.28);
+      --text-label:    #1F798C;               /* Teal section labels */
+      --card-bg:       rgba(255,255,255,0.05);
+      --card-border:   rgba(255,255,255,0.07);
+      --font-main:     'DM Sans', sans-serif;
+      --font-mono:     'DM Mono', monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ============================================================
+       VIEWPORT BASE CSS — mandatory, included in full (viewport-base.css)
+       ============================================================ */
+
+    /* 1. Lock html/body to viewport */
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+    html {
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+
+    /* 2. Each slide = exact viewport height */
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;           /* Dynamic viewport height for mobile browsers */
+      overflow: hidden;         /* CRITICAL: prevent ANY overflow */
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* 3. Content container */
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-height: 100%;
+      overflow: hidden;
+      padding: var(--slide-padding);
+    }
+
+    /* 4. ALL typography uses clamp() for responsive scaling */
+    :root {
+      --title-size:    clamp(1.5rem, 5vw, 4rem);
+      --h2-size:       clamp(1.25rem, 3.5vw, 2.5rem);
+      --h3-size:       clamp(1rem, 2.5vw, 1.75rem);
+      --body-size:     clamp(0.75rem, 1.5vw, 1.125rem);
+      --small-size:    clamp(0.65rem, 1vw, 0.875rem);
+      --slide-padding: clamp(1rem, 4vw, 4rem);
+      --content-gap:   clamp(0.5rem, 2vw, 2rem);
+      --element-gap:   clamp(0.25rem, 1vw, 1rem);
+    }
+
+    /* 5. Cards/containers use viewport-relative max sizes */
+    .card, .container, .content-box {
+      max-width: min(90vw, 1000px);
+      max-height: min(80vh, 700px);
+    }
+
+    /* 6. Lists auto-scale */
+    .feature-list, .bullet-list {
+      gap: clamp(0.4rem, 1vh, 1rem);
+    }
+    .feature-list li, .bullet-list li {
+      font-size: var(--body-size);
+      line-height: 1.4;
+    }
+
+    /* 7. Grids adapt to space */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+      gap: clamp(0.5rem, 1.5vw, 1rem);
+    }
+
+    /* 8. Images constrained */
+    img, .image-container {
+      max-width: 100%;
+      max-height: min(50vh, 400px);
+      object-fit: contain;
+    }
+
+    /* === RESPONSIVE HEIGHT BREAKPOINTS === */
+    @media (max-height: 700px) {
+      :root {
+        --slide-padding: clamp(0.75rem, 3vw, 2rem);
+        --content-gap:   clamp(0.4rem, 1.5vw, 1rem);
+        --title-size:    clamp(1.25rem, 4.5vw, 2.5rem);
+        --h2-size:       clamp(1rem, 3vw, 1.75rem);
+      }
+    }
+    @media (max-height: 600px) {
+      :root {
+        --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+        --content-gap:   clamp(0.3rem, 1vw, 0.75rem);
+        --title-size:    clamp(1.1rem, 4vw, 2rem);
+        --body-size:     clamp(0.7rem, 1.2vw, 0.95rem);
+      }
+      .nav-dots, .keyboard-hint, .decorative { display: none; }
+    }
+    @media (max-height: 500px) {
+      :root {
+        --slide-padding: clamp(0.4rem, 2vw, 1rem);
+        --title-size:    clamp(1rem, 3.5vw, 1.5rem);
+        --h2-size:       clamp(0.9rem, 2.5vw, 1.25rem);
+        --body-size:     clamp(0.65rem, 1vw, 0.85rem);
+      }
+    }
+    @media (max-width: 600px) {
+      :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* === REDUCED MOTION === */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+    /* ============================================================
+       GLOBAL RESET & BASE
+       ============================================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: var(--font-main);
+      background: var(--bg-primary);
+      color: var(--text-heading);
+    }
+
+    /* ============================================================
+       ACUMEN BRAND ELEMENTS — applied on every slide
+       ============================================================ */
+
+    /* 3px Green top bar — NON-NEGOTIABLE brand rule */
+    .brand-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent-green);
+      z-index: 10;
+    }
+
+    /* Vertical left accent line — 1px, Green-tinted gradient */
+    .accent-line {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: clamp(2rem, 5vw, 5rem);
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(106,158,57,0.40), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Teal atmosphere orb — radial gradient for depth */
+    .atmosphere {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 75% 55%, rgba(31,121,140,0.12), transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Slide counter — bottom-right, DM Mono, very low opacity */
+    .slide-counter {
+      position: absolute;
+      bottom: clamp(1rem, 2vh, 2rem);
+      right: clamp(1rem, 2vw, 2rem);
+      font-family: var(--font-mono);
+      font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+      color: var(--text-caption);
+      letter-spacing: 0.1em;
+      z-index: 5;
+    }
+
+    /* Logo — ACUMEN white, BI green. Dark backgrounds only. */
+    .logo {
+      font-family: var(--font-main);
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      user-select: none;
+    }
+    .logo-acumen { color: #ffffff; }
+    .logo-bi     { color: var(--accent-green); }
+
+    /* ============================================================
+       TYPOGRAPHY COMPONENTS
+       ============================================================ */
+
+    /* Section label — Teal, uppercase, spaced */
+    .label {
+      font-family: var(--font-main);
+      font-weight: 500;
+      font-size: clamp(0.58rem, 0.85vw, 0.72rem);
+      color: var(--text-label);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: clamp(0.35rem, 0.8vh, 0.65rem);
+    }
+
+    /* Primary heading */
+    h2.slide-heading, h2 {
+      font-family: var(--font-main);
+      font-weight: 600;
+      font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+      color: var(--text-heading);
+      line-height: 1.1;
+    }
+
+    /* Subheading — Teal */
+    .subheading {
+      font-family: var(--font-main);
+      font-weight: 400;
+      color: var(--accent-teal);
+      font-size: clamp(0.82rem, 1.4vw, 1.1rem);
+      margin-top: clamp(0.2rem, 0.4vh, 0.4rem);
+    }
+
+    /* Body / descriptive text */
+    .body-text {
+      font-family: var(--font-main);
+      font-weight: 300;
+      font-size: var(--body-size);
+      color: var(--text-sub);
+      line-height: 1.7;
+    }
+
+    /* ============================================================
+       CARD COMPONENTS
+       All accent bars rotate Teal → Brass → Rose (never all green)
+       ============================================================ */
+
+    /* Service cards — 3×2 feature grid */
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(0.55rem, 1.1vw, 0.9rem);
+      margin-top: clamp(0.75rem, 1.4vh, 1.4rem);
+    }
+    @media (max-width: 800px) { .service-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .service-grid { grid-template-columns: 1fr; } }
+
+    .service-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      padding: clamp(0.7rem, 1.3vh, 1.1rem) clamp(0.7rem, 1.3vw, 1.1rem);
+      position: relative;
+      overflow: hidden;
+    }
+    /* 2px top accent bar rotating Teal → Brass → Rose */
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .service-card:nth-child(3n+1)::before { background: var(--accent-teal); }
+    .service-card:nth-child(3n+2)::before { background: var(--accent-brass); }
+    .service-card:nth-child(3n+3)::before { background: var(--accent-rose); }
+
+    .service-card h3 {
+      font-family: var(--font-main);
+      font-weight: 600;
+      font-size: clamp(0.78rem, 1.25vw, 0.98rem);
+      color: var(--text-heading);
+      margin-bottom: clamp(0.2rem, 0.4vh, 0.35rem);
+    }
+    .service-card p {
+      font-family: var(--font-main);
+      font-weight: 300;
+      font-size: clamp(0.63rem, 0.95vw, 0.82rem);
+      color: var(--text-body);
+      line-height: 1.55;
+    }
+
+    /* About cards — 2×2 grid */
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(0.6rem, 1.2vw, 1rem);
+      margin-top: clamp(0.75rem, 1.5vh, 1.5rem);
+    }
+    @media (max-width: 600px) { .about-grid { grid-template-columns: 1fr; } }
+
+    /* Approach cards — 3 columns */
+    .approach-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(0.7rem, 1.4vw, 1.2rem);
+      margin-top: clamp(0.75rem, 1.5vh, 1.5rem);
+    }
+    @media (max-width: 700px) { .approach-grid { grid-template-columns: 1fr; } }
+
+    .approach-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      padding: clamp(0.9rem, 1.8vh, 1.5rem) clamp(0.9rem, 1.5vw, 1.4rem);
+      position: relative;
+    }
+    .approach-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .approach-card:nth-child(1)::before { background: var(--accent-teal); }
+    .approach-card:nth-child(2)::before { background: var(--accent-brass); }
+    .approach-card:nth-child(3)::before { background: var(--accent-rose); }
+
+    .approach-num {
+      font-family: var(--font-mono);
+      font-size: clamp(0.65rem, 1vw, 0.82rem);
+      color: var(--accent-teal);
+      margin-bottom: clamp(0.25rem, 0.5vh, 0.45rem);
+    }
+    .approach-card h3 {
+      font-family: var(--font-main);
+      font-weight: 600;
+      font-size: clamp(0.82rem, 1.3vw, 1rem);
+      color: var(--text-heading);
+      margin-bottom: clamp(0.2rem, 0.4vh, 0.4rem);
+    }
+    .approach-card p {
+      font-family: var(--font-main);
+      font-weight: 300;
+      font-size: clamp(0.63rem, 0.95vw, 0.82rem);
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       EXPERIENCE LIST — bullet points with coloured dots
+       ============================================================ */
+    .exp-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.5rem, 1.1vh, 0.9rem);
+      margin-top: clamp(0.7rem, 1.4vh, 1.3rem);
+    }
+    .exp-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(0.55rem, 1.1vw, 0.9rem);
+      font-family: var(--font-main);
+      font-weight: 300;
+      font-size: var(--body-size);
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+    .exp-dot {
+      flex-shrink: 0;
+      width: clamp(5px, 0.75vw, 7px);
+      height: clamp(5px, 0.75vw, 7px);
+      border-radius: 50%;
+      margin-top: clamp(0.35rem, 0.55vh, 0.5rem);
+    }
+    .exp-dot.teal  { background: var(--accent-teal); }
+    .exp-dot.brass { background: var(--accent-brass); }
+    .exp-dot.rose  { background: var(--accent-rose); }
+
+    /* ============================================================
+       TITLE SLIDE
+       ============================================================ */
+    .title-slide {
+      background: var(--bg-primary);
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .title-inner {
+      padding: var(--slide-padding);
+      padding-left: clamp(3rem, 7vw, 8rem);
+      max-width: min(82vw, 840px);
+      z-index: 1;
+    }
+    .title-eyebrow {
+      font-family: var(--font-main);
+      font-weight: 500;
+      font-size: clamp(0.58rem, 0.85vw, 0.72rem);
+      color: var(--accent-teal);
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      margin-bottom: clamp(0.75rem, 1.4vh, 1.2rem);
+    }
+    .title-main {
+      font-family: var(--font-main);
+      font-weight: 600;
+      font-size: clamp(2rem, 5.5vw, 4.5rem);
+      color: #ffffff;
+      line-height: 1.05;
+      margin-bottom: clamp(0.5rem, 1vh, 0.9rem);
+    }
+    .title-sub {
+      font-family: var(--font-main);
+      font-weight: 300;
+      font-size: clamp(0.85rem, 1.5vw, 1.15rem);
+      color: var(--text-sub);
+      line-height: 1.65;
+      margin-bottom: clamp(1rem, 2.5vh, 2.5rem);
+      max-width: 58ch;
+    }
+    .title-tagline {
+      font-family: var(--font-mono);
+      font-size: clamp(0.6rem, 0.85vw, 0.75rem);
+      color: var(--accent-green);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       CTA / CLOSING SLIDE
+       ============================================================ */
+    .cta-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--slide-padding);
+      z-index: 1;
+      flex: 1;
+    }
+    .cta-logo {
+      font-size: clamp(1.1rem, 2vw, 1.6rem);
+      margin-bottom: clamp(0.75rem, 1.5vh, 1.5rem);
+    }
+    .cta-heading {
+      font-family: var(--font-main);
+      font-weight: 600;
+      font-size: clamp(1.8rem, 4.5vw, 3.5rem);
+      color: #ffffff;
+      line-height: 1.1;
+    }
+    .cta-divider {
+      width: clamp(40px, 6vw, 64px);
+      height: 2px;
+      background: var(--accent-green);
+      margin: clamp(0.75rem, 1.5vh, 1.5rem) auto;
+    }
+    .cta-contact {
+      font-family: var(--font-main);
+      font-weight: 300;
+      font-size: clamp(0.8rem, 1.3vw, 1rem);
+      color: var(--text-sub);
+      line-height: 2;
+    }
+    .cta-contact strong {
+      color: var(--accent-teal);
+      font-weight: 500;
+    }
+    .cta-tagline {
+      font-family: var(--font-mono);
+      font-size: clamp(0.6rem, 0.85vw, 0.75rem);
+      color: var(--accent-green);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: clamp(0.5rem, 1vh, 0.75rem);
+      display: block;
+    }
+
+    /* ============================================================
+       PROGRESS BAR
+       ============================================================ */
+    .progress-bar {
+      position: fixed;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: var(--accent-green);
+      transition: width 0.3s ease;
+      z-index: 100;
+      opacity: 0.6;
+      width: 0%;
+    }
+
+    /* ============================================================
+       NAV DOTS
+       ============================================================ */
+    .nav-dots {
+      position: fixed;
+      right: clamp(0.75rem, 1.5vw, 1.5rem);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.35rem, 0.7vh, 0.6rem);
+      z-index: 100;
+    }
+    .nav-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      padding: 0;
+    }
+    .nav-dot.active {
+      background: var(--accent-green);
+      transform: scale(1.6);
+    }
+    .nav-dot:hover { background: rgba(255,255,255,0.5); }
+
+    /* ============================================================
+       REVEAL ANIMATIONS
+       Triggered by IntersectionObserver adding .visible to .slide
+       ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.65s var(--ease-out-expo), transform 0.65s var(--ease-out-expo);
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+
+    /* Stagger for sequential reveal */
+    .reveal:nth-child(1) { transition-delay: 0.08s; }
+    .reveal:nth-child(2) { transition-delay: 0.18s; }
+    .reveal:nth-child(3) { transition-delay: 0.28s; }
+    .reveal:nth-child(4) { transition-delay: 0.38s; }
+    .reveal:nth-child(5) { transition-delay: 0.48s; }
+
+    /* Card stagger — applied on the container, cascades to children */
+    .reveal-cards .service-card,
+    .reveal-cards .approach-card,
+    .reveal-cards .about-card {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo);
+    }
+    .slide.visible .reveal-cards .service-card,
+    .slide.visible .reveal-cards .approach-card,
+    .slide.visible .reveal-cards .about-card { opacity: 1; transform: translateY(0); }
+
+    .reveal-cards .service-card:nth-child(1),
+    .reveal-cards .approach-card:nth-child(1),
+    .reveal-cards .about-card:nth-child(1) { transition-delay: 0.28s; }
+    .reveal-cards .service-card:nth-child(2),
+    .reveal-cards .approach-card:nth-child(2),
+    .reveal-cards .about-card:nth-child(2) { transition-delay: 0.36s; }
+    .reveal-cards .service-card:nth-child(3),
+    .reveal-cards .approach-card:nth-child(3),
+    .reveal-cards .about-card:nth-child(3) { transition-delay: 0.44s; }
+    .reveal-cards .service-card:nth-child(4),
+    .reveal-cards .about-card:nth-child(4) { transition-delay: 0.52s; }
+    .reveal-cards .service-card:nth-child(5) { transition-delay: 0.60s; }
+    .reveal-cards .service-card:nth-child(6) { transition-delay: 0.68s; }
+
+    /* ============================================================
+       INLINE EDITING — JS-based hover (NOT CSS ~ sibling selector)
+       pointer-events: none breaks hover chain, so must use JS + timeout
+       ============================================================ */
+    .edit-hotzone {
+      position: fixed;
+      top: 0; left: 0;
+      width: 80px; height: 80px;
+      z-index: 10000;
+      cursor: pointer;
+    }
+    .edit-toggle {
+      position: fixed;
+      top: 14px; left: 14px;
+      background: rgba(31,121,140,0.92);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-family: var(--font-main);
+      font-weight: 500;
+      font-size: 0.76rem;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 10001;
+    }
+    /* JS adds .show on hotzone hover, .active when editing is on */
+    .edit-toggle.show,
+    .edit-toggle.active { opacity: 1; pointer-events: auto; }
+
+    .edit-banner {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(31,121,140,0.92);
+      color: #fff;
+      padding: 5px 18px;
+      border-radius: 4px;
+      font-family: var(--font-main);
+      font-size: 0.70rem;
+      letter-spacing: 0.05em;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+    }
+    .edit-banner.active { opacity: 1; }
+
+    body.edit-active [contenteditable] {
+      outline: 1px dashed rgba(31,121,140,0.45);
+      border-radius: 2px;
+      cursor: text;
+    }
+    body.edit-active [contenteditable]:focus {
+      outline: 1px solid var(--accent-teal);
+      background: rgba(31,121,140,0.06);
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Progress bar — bottom, green, opacity 0.6 -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Navigation dots — right edge, vertical -->
+  <nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+  <!-- Inline editing UI (JS-controlled visibility) -->
+  <div class="edit-hotzone" id="editHotzone"></div>
+  <button class="edit-toggle" id="editToggle" title="Toggle edit mode (E)">✏ Edit</button>
+  <div class="edit-banner" id="editBanner">Edit mode · Click any text · Ctrl+S to save</div>
+
+
+  <!-- ============================================================
+       SLIDE 1 — TITLE
+       ============================================================ -->
+  <section class="slide title-slide" id="slide-1">
+    <div class="brand-bar"></div>
+    <div class="accent-line"></div>
+    <div class="atmosphere"></div>
+
+    <div class="title-inner">
+      <p class="title-eyebrow reveal">Health Sector Capabilities</p>
+      <h1 class="title-main reveal">Advanced Analytics<br>for Better Health<br>Outcomes</h1>
+      <p class="title-sub reveal">We work alongside your team to turn complex health data into clear intelligence — supporting clinical decisions, operational efficiency, and population health strategy.</p>
+      <p class="title-tagline reveal">Acumen BI · Auckland · Wellington · New Zealand</p>
+    </div>
+
+    <div class="logo" style="position:absolute; bottom:clamp(1.25rem,2.5vh,2.5rem); left:clamp(2.5rem,5.5vw,5.5rem); font-size:clamp(0.85rem,1.3vw,1rem); z-index:5;">
+      <span class="logo-acumen">ACUMEN</span>&nbsp;<span class="logo-bi">BI</span>
+    </div>
+    <div class="slide-counter">01 / 06</div>
+  </section>
+
+
+  <!-- ============================================================
+       SLIDE 2 — ABOUT ACUMEN BI
+       ============================================================ -->
+  <section class="slide" id="slide-2">
+    <div class="brand-bar"></div>
+    <div class="accent-line"></div>
+    <div class="atmosphere"></div>
+
+    <div class="slide-content" style="padding-left:clamp(3rem,7vw,8rem);">
+      <p class="label reveal">About Us</p>
+      <h2 class="reveal">New Zealand's Data &amp; Analytics Specialists</h2>
+      <p class="subheading reveal">NZ Owned &amp; Operated · Auckland · Wellington</p>
+
+      <div class="about-grid reveal-cards">
+        <div class="about-card service-card">
+          <h3>Full Data Spectrum</h3>
+          <p>Advisory and strategy through to data engineering, analytics, visualisation, and architecture — end to end.</p>
+        </div>
+        <div class="about-card service-card">
+          <h3>Health &amp; Government Leaders</h3>
+          <p>Deep experience across public health organisations, hospital networks, and government agencies throughout New Zealand.</p>
+        </div>
+        <div class="about-card service-card">
+          <h3>AI-Powered Intelligence</h3>
+          <p>We apply AI and machine learning practically — to real health data problems, not hypothetical use cases.</p>
+        </div>
+        <div class="about-card service-card">
+          <h3>Alongside Your Team</h3>
+          <p>We embed with your people, transfer knowledge, and build capability that stays with your organisation.</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">02 / 06</div>
+  </section>
+
+
+  <!-- ============================================================
+       SLIDE 3 — OUR SERVICES (feature grid 3×2)
+       ============================================================ -->
+  <section class="slide" id="slide-3">
+    <div class="brand-bar"></div>
+    <div class="accent-line"></div>
+    <div class="atmosphere"></div>
+
+    <div class="slide-content" style="padding-left:clamp(3rem,7vw,8rem);">
+      <p class="label reveal">What We Do</p>
+      <h2 class="reveal">Our Services</h2>
+
+      <div class="service-grid reveal-cards">
+        <div class="service-card">
+          <h3>Advisory &amp; Strategy</h3>
+          <p>Data strategy, operating model design, and transformation roadmaps for health sector organisations.</p>
+        </div>
+        <div class="service-card">
+          <h3>Data Engineering</h3>
+          <p>Pipelines, platforms, and data warehousing built to handle the complexity of health data at scale.</p>
+        </div>
+        <div class="service-card">
+          <h3>Analytics &amp; AI</h3>
+          <p>Predictive models, demand forecasting, risk stratification, and population health analytics.</p>
+        </div>
+        <div class="service-card">
+          <h3>Visualisation</h3>
+          <p>Clear, actionable dashboards for clinical teams, executives, and operations — in any BI tool.</p>
+        </div>
+        <div class="service-card">
+          <h3>Operating Models</h3>
+          <p>Designing data teams, governance structures, and capability frameworks that work in practice.</p>
+        </div>
+        <div class="service-card">
+          <h3>Architecture</h3>
+          <p>Modern cloud data architecture designed for health interoperability, FHIR, and regulatory requirements.</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">03 / 06</div>
+  </section>
+
+
+  <!-- ============================================================
+       SLIDE 4 — HEALTH SECTOR EXPERIENCE
+       ============================================================ -->
+  <section class="slide" id="slide-4">
+    <div class="brand-bar"></div>
+    <div class="accent-line"></div>
+    <div class="atmosphere"></div>
+
+    <div class="slide-content" style="padding-left:clamp(3rem,7vw,8rem);">
+      <p class="label reveal">Sector Experience</p>
+      <h2 class="reveal">Deep Roots in Health Data</h2>
+      <p class="body-text reveal" style="margin-top:clamp(0.2rem,0.4vh,0.4rem); max-width:58ch;">We've worked with health organisations across the public and private sector — from frontline clinical teams to national strategy groups.</p>
+
+      <ul class="exp-list">
+        <li class="reveal">
+          <span class="exp-dot teal"></span>
+          <span><strong style="color:var(--text-heading); font-weight:600;">Clinical &amp; Patient Data</strong> — Longitudinal patient records, clinical coding, episode data, and outcome tracking across care pathways.</span>
+        </li>
+        <li class="reveal">
+          <span class="exp-dot brass"></span>
+          <span><strong style="color:var(--text-heading); font-weight:600;">Population Health &amp; Equity</strong> — Population segmentation, health equity analysis, and preventive care targeting at scale.</span>
+        </li>
+        <li class="reveal">
+          <span class="exp-dot rose"></span>
+          <span><strong style="color:var(--text-heading); font-weight:600;">Workforce &amp; Capacity Planning</strong> — Rostering analytics, demand modelling, and bed capacity forecasting to improve operational efficiency.</span>
+        </li>
+        <li class="reveal">
+          <span class="exp-dot teal"></span>
+          <span><strong style="color:var(--text-heading); font-weight:600;">Quality, Safety &amp; Compliance</strong> — Indicator reporting, audit dashboards, and regulatory compliance analytics for health standards.</span>
+        </li>
+      </ul>
+    </div>
+    <div class="slide-counter">04 / 06</div>
+  </section>
+
+
+  <!-- ============================================================
+       SLIDE 5 — HOW WE WORK
+       ============================================================ -->
+  <section class="slide" id="slide-5">
+    <div class="brand-bar"></div>
+    <div class="accent-line"></div>
+    <div class="atmosphere"></div>
+
+    <div class="slide-content" style="padding-left:clamp(3rem,7vw,8rem);">
+      <p class="label reveal">Our Approach</p>
+      <h2 class="reveal">How We Work</h2>
+
+      <div class="approach-grid reveal-cards">
+        <div class="approach-card">
+          <div class="approach-num">01</div>
+          <h3>Alongside Your Team</h3>
+          <p>We embed with your people, not above them. Knowledge and capability stay with your organisation when we're done.</p>
+        </div>
+        <div class="approach-card">
+          <div class="approach-num">02</div>
+          <h3>Outcome-Focused</h3>
+          <p>We focus on the decision you need to make, not the technology. Solutions are designed around your real-world constraints.</p>
+        </div>
+        <div class="approach-card">
+          <div class="approach-num">03</div>
+          <h3>AI Applied Practically</h3>
+          <p>AI and machine learning are tools we apply where they genuinely improve health outcomes — no hype, no shelfware.</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-counter">05 / 06</div>
+  </section>
+
+
+  <!-- ============================================================
+       SLIDE 6 — LET'S TALK (CTA / closing)
+       ============================================================ -->
+  <section class="slide" id="slide-6">
+    <div class="brand-bar"></div>
+    <div class="atmosphere"></div>
+
+    <div class="cta-inner">
+      <div class="logo cta-logo reveal">
+        <span class="logo-acumen">ACUMEN</span>&nbsp;<span class="logo-bi">BI</span>
+      </div>
+      <p class="label reveal" style="text-align:center;">Let's Talk</p>
+      <h2 class="cta-heading reveal">Ready to work alongside<br>your health team?</h2>
+      <div class="cta-divider reveal"></div>
+      <div class="cta-contact reveal">
+        <strong>Auckland</strong> · <strong>Wellington</strong><br>
+        acumenbi.co.nz<br>
+        <span class="cta-tagline">Advanced Analytics · AI-Powered Intelligence</span>
+      </div>
+    </div>
+    <div class="slide-counter">06 / 06</div>
+  </section>
+
+
+  <script>
+    /* ============================================================
+       SLIDE PRESENTATION CONTROLLER
+       Keyboard, touch, mouse-wheel navigation + progress bar + nav dots
+       ============================================================ */
+    class SlidePresentation {
+      constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.total = this.slides.length;
+        this.current = 0;
+        this.lastScrollTime = 0;
+        this.progressBar = document.getElementById('progressBar');
+        this.navDotsContainer = document.getElementById('navDots');
+
+        this.buildNavDots();
+        this.setupObserver();
+        this.setupKeyboard();
+        this.setupTouch();
+        this.setupWheel();
+        this.goTo(0, false);
+      }
+
+      buildNavDots() {
+        // Always clear before building — prevents duplicate dots on re-open
+        this.navDotsContainer.innerHTML = '';
+        this.slides.forEach((_, i) => {
+          const dot = document.createElement('button');
+          dot.className = 'nav-dot';
+          dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+          dot.addEventListener('click', () => this.goTo(i));
+          this.navDotsContainer.appendChild(dot);
+        });
+      }
+
+      updateUI() {
+        const dots = this.navDotsContainer.querySelectorAll('.nav-dot');
+        dots.forEach((d, i) => d.classList.toggle('active', i === this.current));
+        const pct = this.total > 1 ? (this.current / (this.total - 1)) * 100 : 100;
+        this.progressBar.style.width = pct + '%';
+      }
+
+      goTo(index, smooth = true) {
+        index = Math.max(0, Math.min(this.total - 1, index));
+        this.current = index;
+        this.slides[index].scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
+        this.updateUI();
+      }
+
+      setupObserver() {
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              const idx = this.slides.indexOf(entry.target);
+              if (idx !== -1) { this.current = idx; this.updateUI(); }
+            }
+          });
+        }, { threshold: 0.5 });
+        this.slides.forEach(s => observer.observe(s));
+      }
+
+      setupKeyboard() {
+        document.addEventListener('keydown', e => {
+          if (e.target.getAttribute('contenteditable')) return;
+          switch (e.key) {
+            case 'ArrowDown': case 'ArrowRight': case ' ': case 'PageDown':
+              e.preventDefault(); this.goTo(this.current + 1); break;
+            case 'ArrowUp': case 'ArrowLeft': case 'PageUp':
+              e.preventDefault(); this.goTo(this.current - 1); break;
+            case 'Home': e.preventDefault(); this.goTo(0); break;
+            case 'End':  e.preventDefault(); this.goTo(this.total - 1); break;
+          }
+        });
+      }
+
+      setupTouch() {
+        let startY = 0, startX = 0;
+        document.addEventListener('touchstart', e => {
+          startY = e.touches[0].clientY;
+          startX = e.touches[0].clientX;
+        }, { passive: true });
+        document.addEventListener('touchend', e => {
+          const dy = startY - e.changedTouches[0].clientY;
+          const dx = startX - e.changedTouches[0].clientX;
+          if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 40) {
+            this.goTo(this.current + (dy > 0 ? 1 : -1));
+          }
+        }, { passive: true });
+      }
+
+      setupWheel() {
+        document.addEventListener('wheel', e => {
+          const now = Date.now();
+          if (now - this.lastScrollTime < 800) return;
+          if (Math.abs(e.deltaY) < 20) return;
+          this.lastScrollTime = now;
+          e.preventDefault();
+          this.goTo(this.current + (e.deltaY > 0 ? 1 : -1));
+        }, { passive: false });
+      }
+    }
+
+    /* ============================================================
+       INLINE EDITOR
+       Ctrl+S saves a clean copy (edit state stripped before outerHTML capture)
+       ============================================================ */
+    class InlineEditor {
+      constructor() {
+        this.isActive = false;
+        this._saveHandler = null;
+      }
+
+      toggleEditMode() {
+        this.isActive = !this.isActive;
+        const toggle = document.getElementById('editToggle');
+        const banner = document.getElementById('editBanner');
+
+        if (this.isActive) {
+          // Make all visible text editable
+          document.querySelectorAll(
+            '.slide h1, .slide h2, .slide h3, .slide p, .slide .label, ' +
+            '.slide .subheading, .slide .title-eyebrow, .slide .title-main, ' +
+            '.slide .title-sub, .slide .title-tagline, .slide .cta-contact, ' +
+            '.slide .approach-num, .slide strong'
+          ).forEach(el => el.setAttribute('contenteditable', 'true'));
+
+          document.body.classList.add('edit-active');
+          toggle.textContent = '✓ Done';
+          toggle.classList.add('active');
+          banner.classList.add('active');
+
+          this._saveHandler = e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+              e.preventDefault();
+              this.exportFile();
+            }
+          };
+          document.addEventListener('keydown', this._saveHandler);
+        } else {
+          document.querySelectorAll('[contenteditable]')
+            .forEach(el => el.removeAttribute('contenteditable'));
+          document.body.classList.remove('edit-active');
+          toggle.textContent = '✏ Edit';
+          toggle.classList.remove('active');
+          banner.classList.remove('active');
+          if (this._saveHandler) {
+            document.removeEventListener('keydown', this._saveHandler);
+            this._saveHandler = null;
+          }
+        }
+      }
+
+      exportFile() {
+        // Strip edit state before capturing so saved file opens cleanly
+        const editables = Array.from(document.querySelectorAll('[contenteditable]'));
+        editables.forEach(el => el.removeAttribute('contenteditable'));
+        document.body.classList.remove('edit-active');
+        const toggle = document.getElementById('editToggle');
+        const banner = document.getElementById('editBanner');
+        toggle?.classList.remove('active', 'show');
+        banner?.classList.remove('active');
+
+        const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+        // Restore edit state so user can keep editing
+        document.body.classList.add('edit-active');
+        editables.forEach(el => el.setAttribute('contenteditable', 'true'));
+        toggle?.classList.add('active');
+        banner?.classList.add('active');
+
+        const blob = new Blob([html], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'acumen-health-capabilities.html';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+    }
+
+    /* ============================================================
+       INIT
+       ============================================================ */
+    const presentation = new SlidePresentation();
+    const editor = new InlineEditor();
+
+    /* === EDIT HOTZONE — JS hover with 400ms grace period === */
+    /* CSS ~ sibling selector NOT used: pointer-events:none breaks hover chain */
+    const hotzone   = document.getElementById('editHotzone');
+    const editToggle = document.getElementById('editToggle');
+    let hideTimeout = null;
+
+    hotzone.addEventListener('mouseenter', () => {
+      clearTimeout(hideTimeout);
+      editToggle.classList.add('show');
+    });
+    hotzone.addEventListener('mouseleave', () => {
+      hideTimeout = setTimeout(() => {
+        if (!editor.isActive) editToggle.classList.remove('show');
+      }, 400);
+    });
+    editToggle.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+    editToggle.addEventListener('mouseleave', () => {
+      hideTimeout = setTimeout(() => {
+        if (!editor.isActive) editToggle.classList.remove('show');
+      }, 400);
+    });
+
+    // Click the hotzone itself or the button
+    hotzone.addEventListener('click', () => editor.toggleEditMode());
+    editToggle.addEventListener('click', () => editor.toggleEditMode());
+
+    // E key shortcut (skip when user is editing text)
+    document.addEventListener('keydown', e => {
+      if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) {
+        editor.toggleEditMode();
+      }
+    });
+  </script>
+</body>
+</html>
