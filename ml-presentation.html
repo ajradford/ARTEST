@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning — Internal Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;1,400;1,600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* === THEME: DARK BOTANICAL ===
+   Change :root variables to restyle the entire deck */
+:root {
+  --bg-primary:     #0f0f0f;
+  --text-primary:   #e8e4df;
+  --text-secondary: #9a9590;
+  --accent-warm:    #d4a574;
+  --accent-pink:    #e8b4b8;
+  --accent-gold:    #c9b896;
+  --font-display:   'Cormorant', serif;
+  --font-body:      'IBM Plex Sans', sans-serif;
+
+  /* Typography — clamp() ensures scaling at every viewport size */
+  --title-size:    clamp(2.2rem, 6vw, 5.5rem);
+  --h2-size:       clamp(1.4rem, 3.5vw, 2.8rem);
+  --h3-size:       clamp(1rem,   2.5vw, 1.6rem);
+  --body-size:     clamp(0.78rem, 1.4vw, 1.05rem);
+  --small-size:    clamp(0.62rem, 0.9vw, 0.78rem);
+  --label-size:    clamp(0.58rem, 0.8vw, 0.72rem);
+
+  /* Spacing */
+  --slide-padding:  clamp(1.5rem, 5vw, 5rem);
+  --content-gap:    clamp(0.75rem, 2vw, 2rem);
+  --element-gap:    clamp(0.4rem,  1vw, 1rem);
+
+  /* Animation easing */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* === RESET === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ul { list-style: none; }
+
+/* === VIEWPORT BASE CSS (mandatory — do not remove) === */
+html, body { height: 100%; overflow-x: hidden; }
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+.slide {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg-primary);
+}
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 100%;
+  overflow: hidden;
+  padding: var(--slide-padding);
+}
+.card, .container, .content-box {
+  max-width: min(90vw, 1000px);
+  max-height: min(80vh, 700px);
+}
+.feature-list, .bullet-list { gap: clamp(0.4rem, 1vh, 1rem); }
+.feature-list li, .bullet-list li { font-size: var(--body-size); line-height: 1.4; }
+img, .image-container {
+  max-width: 100%;
+  max-height: min(50vh, 400px);
+  object-fit: contain;
+}
+
+/* === BREAKPOINTS === */
+@media (max-height: 700px) {
+  :root {
+    --slide-padding: clamp(0.75rem, 3vw, 2rem);
+    --content-gap:   clamp(0.4rem,  1.5vw, 1rem);
+    --title-size:    clamp(1.6rem,  4.5vw, 3rem);
+    --h2-size:       clamp(1.1rem,  3vw, 2rem);
+  }
+}
+@media (max-height: 600px) {
+  :root {
+    --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+    --content-gap:   clamp(0.3rem, 1vw, 0.75rem);
+    --title-size:    clamp(1.2rem, 4vw, 2rem);
+    --body-size:     clamp(0.68rem, 1.2vw, 0.9rem);
+  }
+  .nav-dots, .keyboard-hint, .decorative { display: none; }
+}
+@media (max-height: 500px) {
+  :root {
+    --slide-padding: clamp(0.4rem, 2vw, 1rem);
+    --title-size:    clamp(1rem,   3.5vw, 1.5rem);
+    --h2-size:       clamp(0.9rem, 2.5vw, 1.25rem);
+    --body-size:     clamp(0.62rem, 1vw, 0.82rem);
+  }
+}
+@media (max-width: 600px) {
+  :root { --title-size: clamp(1.4rem, 7vw, 2.8rem); }
+  .type-grid { grid-template-columns: 1fr !important; }
+  .steps-grid { grid-template-columns: 1fr 1fr !important; }
+  .apps-grid  { grid-template-columns: 1fr !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.2s  !important;
+  }
+  html { scroll-behavior: auto; }
+  .blob { animation: none !important; }
+}
+
+/* === PROGRESS BAR === */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-warm), var(--accent-pink));
+  z-index: 1000;
+  transition: width 0.3s var(--ease-expo);
+}
+
+/* === NAV DOTS === */
+.nav-dots {
+  position: fixed;
+  bottom: clamp(1.2rem, 2.5vw, 2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: clamp(6px, 1vw, 10px);
+  z-index: 1000;
+}
+.nav-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(232,228,223,0.18);
+  border: none; cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+  padding: 0;
+}
+.nav-dot.active {
+  background: var(--accent-warm);
+  transform: scale(1.35);
+}
+
+/* === SHARED: ABSTRACT BLOBS ===
+   Soft blurred gradient circles — Dark Botanical signature */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+.blob-gold {
+  background: radial-gradient(circle, rgba(212,165,116,0.22), transparent 70%);
+  animation: drift-a 9s ease-in-out infinite alternate;
+}
+.blob-pink {
+  background: radial-gradient(circle, rgba(232,180,184,0.15), transparent 70%);
+  animation: drift-b 11s ease-in-out infinite alternate-reverse;
+}
+.blob-cream {
+  background: radial-gradient(circle, rgba(201,184,150,0.12), transparent 70%);
+  animation: drift-c 13s ease-in-out infinite alternate;
+}
+@keyframes drift-a {
+  from { transform: translate(0, 0)    scale(1); }
+  to   { transform: translate(3%, 4%)  scale(1.06); }
+}
+@keyframes drift-b {
+  from { transform: translate(0, 0)    scale(1); }
+  to   { transform: translate(-4%, 2%) scale(1.04); }
+}
+@keyframes drift-c {
+  from { transform: translate(0, 0)    scale(1); }
+  to   { transform: translate(2%, -3%) scale(1.08); }
+}
+
+/* === SHARED: ACCENT LINES === */
+.v-line {
+  position: absolute;
+  width: 1px;
+  top: 0; bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(212,165,116,0.35) 25%,
+    rgba(212,165,116,0.35) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+.h-rule {
+  width: clamp(2.5rem, 5vw, 4.5rem);
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--accent-warm), transparent);
+}
+
+/* === REVEAL ANIMATIONS ===
+   .visible is added by IntersectionObserver when slide enters viewport */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.75s var(--ease-expo), transform 0.75s var(--ease-expo);
+}
+.reveal-blur {
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.9s var(--ease-expo), filter 0.9s var(--ease-expo);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-28px);
+  transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
+}
+.slide.visible .reveal,
+.slide.visible .reveal-blur,
+.slide.visible .reveal-left {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+/* Stagger delay for sequential reveals */
+.slide.visible .reveal:nth-child(1)      { transition-delay: 0.08s; }
+.slide.visible .reveal:nth-child(2)      { transition-delay: 0.18s; }
+.slide.visible .reveal:nth-child(3)      { transition-delay: 0.28s; }
+.slide.visible .reveal:nth-child(4)      { transition-delay: 0.38s; }
+.slide.visible .reveal:nth-child(5)      { transition-delay: 0.46s; }
+.slide.visible .reveal:nth-child(6)      { transition-delay: 0.54s; }
+.slide.visible .delay-1 { transition-delay: 0.15s !important; }
+.slide.visible .delay-2 { transition-delay: 0.28s !important; }
+.slide.visible .delay-3 { transition-delay: 0.40s !important; }
+.slide.visible .delay-4 { transition-delay: 0.52s !important; }
+.slide.visible .delay-5 { transition-delay: 0.64s !important; }
+.slide.visible .delay-6 { transition-delay: 0.74s !important; }
+
+/* === SHARED TYPOGRAPHY TOKENS === */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--label-size);
+  font-weight: 300;
+  color: rgba(212,165,116,0.65);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+.slide-counter {
+  position: absolute;
+  bottom: clamp(1.2rem, 3vw, 2.8rem);
+  right: var(--slide-padding);
+  font-family: var(--font-display);
+  font-size: var(--small-size);
+  color: rgba(232,228,223,0.18);
+  letter-spacing: 0.18em;
+  z-index: 5;
+}
+
+/* =====================================================================
+   SLIDE 1 — TITLE
+   Centered, atmospheric, large italic serif heading
+   ===================================================================== */
+.slide-title {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.slide-title .content-center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--content-gap);
+  padding: var(--slide-padding);
+  max-width: min(85vw, 820px);
+}
+.slide-title h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--title-size);
+  color: var(--text-primary);
+  line-height: 1.05;
+}
+.slide-title h1 em {
+  font-style: italic;
+  color: var(--accent-warm);
+}
+.slide-title .subtitle {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: var(--body-size);
+  color: var(--text-secondary);
+  line-height: 1.75;
+  max-width: 48ch;
+  letter-spacing: 0.02em;
+}
+
+/* =====================================================================
+   SLIDE 2 — WHAT IS ML
+   Two-column: left chapter marker, right content
+   ===================================================================== */
+.slide-what {
+  flex-direction: row;
+}
+.slide-what .left-col {
+  flex: 0 0 clamp(4rem, 12vw, 10rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--slide-padding) 0;
+  z-index: 2;
+}
+.chapter-num {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(4rem, 10vw, 9rem);
+  line-height: 1;
+  color: rgba(212,165,116,0.15);
+  user-select: none;
+}
+.slide-what .right-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--slide-padding) var(--slide-padding) var(--slide-padding) 0;
+  z-index: 2;
+  gap: var(--content-gap);
+  overflow: hidden;
+}
+.slide-what h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--h2-size);
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+.slide-what h2 em { font-style: italic; color: var(--accent-warm); }
+.definition {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: var(--body-size);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 55ch;
+  border-left: 1px solid rgba(212,165,116,0.3);
+  padding-left: clamp(0.75rem, 2vw, 1.5rem);
+}
+.principles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--element-gap);
+}
+.principle {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(0.6rem, 1.5vw, 1.2rem);
+}
+.p-dot {
+  flex-shrink: 0;
+  margin-top: 0.3em;
+  width: clamp(5px, 0.8vw, 7px);
+  height: clamp(5px, 0.8vw, 7px);
+  border-radius: 50%;
+  background: var(--accent-warm);
+}
+.p-text { font-family: var(--font-body); font-weight: 300; font-size: var(--body-size); color: var(--text-primary); line-height: 1.5; }
+.p-text strong { font-weight: 500; color: var(--accent-gold); }
+
+/* =====================================================================
+   SLIDE 3 — TYPES OF ML
+   Centered heading + 3 cards in a row
+   ===================================================================== */
+.slide-types .slide-content { align-items: center; text-align: center; }
+.slide-types h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--h2-size);
+  color: var(--text-primary);
+  margin-bottom: var(--content-gap);
+}
+.slide-types h2 em { font-style: italic; color: var(--accent-pink); }
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.75rem, 2vw, 1.75rem);
+  width: 100%;
+  max-width: min(88vw, 960px);
+}
+.type-card {
+  background: rgba(232,228,223,0.03);
+  border: 1px solid rgba(232,228,223,0.07);
+  border-radius: 2px;
+  padding: clamp(1rem, 2.5vw, 2rem) clamp(0.75rem, 2vw, 1.5rem);
+  text-align: left;
+  position: relative;
+  transition: border-color 0.3s ease;
+}
+.type-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+}
+.type-card.warm::before  { background: var(--accent-warm); }
+.type-card.pink::before  { background: var(--accent-pink); }
+.type-card.gold::before  { background: var(--accent-gold); }
+.type-card:hover { border-color: rgba(212,165,116,0.2); }
+.card-icon {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  line-height: 1;
+  margin-bottom: clamp(0.5rem, 1.2vw, 1rem);
+}
+.type-card.warm .card-icon { color: var(--accent-warm); }
+.type-card.pink .card-icon { color: var(--accent-pink); }
+.type-card.gold .card-icon { color: var(--accent-gold); }
+.card-title {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--body-size);
+  color: var(--text-primary);
+  margin-bottom: clamp(0.3rem, 0.8vw, 0.6rem);
+}
+.card-desc {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.card-example {
+  margin-top: clamp(0.4rem, 1vw, 0.75rem);
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  font-weight: 300;
+  color: rgba(232,228,223,0.35);
+  font-style: italic;
+}
+
+/* =====================================================================
+   SLIDE 4 — HOW IT WORKS
+   4-step horizontal pipeline
+   ===================================================================== */
+.slide-how .slide-content { align-items: center; }
+.slide-how h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--h2-size);
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: var(--content-gap);
+}
+.slide-how h2 em { font-style: italic; color: var(--accent-gold); }
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.5rem, 1.5vw, 1.25rem);
+  width: 100%;
+  max-width: min(88vw, 980px);
+  position: relative;
+}
+/* Connector line between steps */
+.steps-grid::before {
+  content: '';
+  position: absolute;
+  top: clamp(1.2rem, 2.5vw, 2rem);
+  left: calc(12.5% + clamp(0.5rem, 1.5vw, 1.25rem) / 2);
+  right: calc(12.5% + clamp(0.5rem, 1.5vw, 1.25rem) / 2);
+  height: 1px;
+  background: linear-gradient(to right,
+    transparent,
+    rgba(212,165,116,0.25) 15%,
+    rgba(212,165,116,0.25) 85%,
+    transparent
+  );
+  z-index: 0;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(0.5rem, 1.2vw, 1rem);
+  z-index: 1;
+}
+.step-num {
+  width: clamp(2.2rem, 4.5vw, 3.8rem);
+  height: clamp(2.2rem, 4.5vw, 3.8rem);
+  border-radius: 50%;
+  border: 1px solid rgba(212,165,116,0.35);
+  background: rgba(212,165,116,0.06);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1rem, 2vw, 1.7rem);
+  color: var(--accent-warm);
+  flex-shrink: 0;
+}
+.step-title {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--small-size);
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+.step-desc {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: clamp(0.58rem, 0.85vw, 0.72rem);
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+@media (max-width: 600px) {
+  .steps-grid { grid-template-columns: 1fr 1fr; }
+  .steps-grid::before { display: none; }
+}
+@media (max-height: 600px) {
+  .step-desc { display: none; }
+}
+
+/* =====================================================================
+   SLIDE 5 — REAL-WORLD IMPACT
+   2×3 applications grid + closing tagline
+   ===================================================================== */
+.slide-impact .slide-content { align-items: center; text-align: center; }
+.slide-impact h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--h2-size);
+  color: var(--text-primary);
+  margin-bottom: var(--content-gap);
+}
+.slide-impact h2 em { font-style: italic; color: var(--accent-pink); }
+.apps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.5rem, 1.5vw, 1.2rem);
+  width: 100%;
+  max-width: min(88vw, 960px);
+  margin-bottom: var(--content-gap);
+}
+.app-item {
+  padding: clamp(0.7rem, 1.5vw, 1.25rem);
+  border-bottom: 1px solid rgba(232,228,223,0.07);
+  text-align: left;
+}
+.app-domain {
+  font-family: var(--font-body);
+  font-size: var(--small-size);
+  font-weight: 400;
+  color: var(--accent-warm);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.3em;
+}
+.app-desc {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: var(--small-size);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.closing-line {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.9rem, 2vw, 1.45rem);
+  color: rgba(212,165,116,0.55);
+  letter-spacing: 0.05em;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Progress bar — fills as user advances through slides -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation dots — generated by JS -->
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- =================================================================
+     SLIDE 1: TITLE
+     ================================================================= -->
+<section class="slide slide-title" data-index="0">
+  <!-- Abstract blobs — Dark Botanical signature -->
+  <div class="blob blob-gold" style="width:clamp(22rem,45vw,42rem);height:clamp(22rem,45vw,42rem);top:-12%;right:-8%;"></div>
+  <div class="blob blob-pink" style="width:clamp(16rem,32vw,28rem);height:clamp(16rem,32vw,28rem);bottom:-8%;left:2%;"></div>
+  <div class="blob blob-cream" style="width:clamp(10rem,20vw,18rem);height:clamp(10rem,20vw,18rem);top:35%;left:12%;"></div>
+  <!-- Thin vertical accent line -->
+  <div class="v-line" style="left:clamp(2.5rem,6vw,6rem);"></div>
+  <!-- Centered content -->
+  <div class="content-center">
+    <p class="eyebrow reveal delay-1">Internal Presentation · 2024</p>
+    <h1 class="reveal delay-2">Machine<br><em>Learning</em></h1>
+    <div class="h-rule reveal delay-3"></div>
+    <p class="subtitle reveal delay-4">From raw data to intelligent decisions — the algorithms, architectures, and principles behind modern machine intelligence.</p>
+  </div>
+  <span class="slide-counter">01 — 05</span>
+</section>
+
+<!-- =================================================================
+     SLIDE 2: WHAT IS MACHINE LEARNING
+     ================================================================= -->
+<section class="slide slide-what" data-index="1">
+  <div class="blob blob-pink" style="width:clamp(20rem,38vw,36rem);height:clamp(20rem,38vw,36rem);top:-15%;left:-10%;"></div>
+  <div class="blob blob-gold" style="width:clamp(14rem,26vw,24rem);height:clamp(14rem,26vw,24rem);bottom:0;right:5%;"></div>
+  <div class="v-line" style="left:clamp(2.5rem,6vw,6rem);"></div>
+  <!-- Left: decorative chapter number -->
+  <div class="left-col">
+    <span class="chapter-num reveal-left">02</span>
+  </div>
+  <!-- Right: content -->
+  <div class="right-col">
+    <p class="eyebrow reveal delay-1">Definition</p>
+    <h2 class="reveal delay-2">What is<br><em>Machine Learning?</em></h2>
+    <p class="definition reveal delay-3">Machine learning is a field of artificial intelligence that gives computers the ability to learn from data and improve their performance on tasks — without being explicitly programmed for each one.</p>
+    <ul class="principles">
+      <li class="principle reveal delay-4">
+        <span class="p-dot"></span>
+        <span class="p-text"><strong>Data-driven</strong> — learns from examples rather than hand-crafted rules</span>
+      </li>
+      <li class="principle reveal delay-5">
+        <span class="p-dot"></span>
+        <span class="p-text"><strong>Pattern recognition</strong> — finds hidden relationships in large, complex datasets</span>
+      </li>
+      <li class="principle reveal delay-6">
+        <span class="p-dot"></span>
+        <span class="p-text"><strong>Self-improving</strong> — performance increases with more data and feedback</span>
+      </li>
+    </ul>
+  </div>
+  <span class="slide-counter">02 — 05</span>
+</section>
+
+<!-- =================================================================
+     SLIDE 3: TYPES OF MACHINE LEARNING
+     ================================================================= -->
+<section class="slide slide-types" data-index="2">
+  <div class="blob blob-gold" style="width:clamp(18rem,36vw,32rem);height:clamp(18rem,36vw,32rem);bottom:-10%;right:-5%;"></div>
+  <div class="blob blob-cream" style="width:clamp(14rem,26vw,22rem);height:clamp(14rem,26vw,22rem);top:-5%;left:10%;"></div>
+  <div class="v-line" style="right:clamp(2.5rem,6vw,6rem);"></div>
+  <div class="slide-content">
+    <p class="eyebrow reveal">Taxonomy</p>
+    <h2 class="reveal">Three Paradigms of <em>Learning</em></h2>
+    <div class="type-grid">
+      <!-- Supervised Learning -->
+      <div class="type-card warm reveal delay-1">
+        <div class="card-icon">I</div>
+        <div class="card-title">Supervised Learning</div>
+        <div class="card-desc">Trained on labeled examples. The model learns to map inputs to known outputs, then predicts on new data.</div>
+        <div class="card-example">e.g. Spam filters, image classifiers, price prediction</div>
+      </div>
+      <!-- Unsupervised Learning -->
+      <div class="type-card pink reveal delay-2">
+        <div class="card-icon">II</div>
+        <div class="card-title">Unsupervised Learning</div>
+        <div class="card-desc">No labels provided. The model discovers hidden structure and natural groupings within the data itself.</div>
+        <div class="card-example">e.g. Customer segmentation, anomaly detection, topic modeling</div>
+      </div>
+      <!-- Reinforcement Learning -->
+      <div class="type-card gold reveal delay-3">
+        <div class="card-icon">III</div>
+        <div class="card-title">Reinforcement Learning</div>
+        <div class="card-desc">An agent learns by taking actions, receiving rewards or penalties, and optimizing its long-term strategy.</div>
+        <div class="card-example">e.g. Game-playing AI, robotics, recommendation tuning</div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-counter">03 — 05</span>
+</section>
+
+<!-- =================================================================
+     SLIDE 4: HOW IT WORKS
+     ================================================================= -->
+<section class="slide slide-how" data-index="3">
+  <div class="blob blob-pink" style="width:clamp(20rem,40vw,36rem);height:clamp(20rem,40vw,36rem);top:-10%;right:-8%;"></div>
+  <div class="blob blob-gold" style="width:clamp(14rem,24vw,20rem);height:clamp(14rem,24vw,20rem);bottom:5%;left:0%;"></div>
+  <div class="v-line" style="left:clamp(2.5rem,6vw,6rem);"></div>
+  <div class="slide-content">
+    <p class="eyebrow reveal">Process</p>
+    <h2 class="reveal">How a Model <em>Learns</em></h2>
+    <div class="steps-grid">
+      <div class="step reveal delay-1">
+        <div class="step-num">1</div>
+        <div class="step-title">Collect &amp; Prepare</div>
+        <div class="step-desc">Gather raw data, clean inconsistencies, handle missing values, and engineer meaningful features.</div>
+      </div>
+      <div class="step reveal delay-2">
+        <div class="step-num">2</div>
+        <div class="step-title">Choose &amp; Train</div>
+        <div class="step-desc">Select an algorithm, feed it training data, and let it iteratively adjust internal parameters to minimize error.</div>
+      </div>
+      <div class="step reveal delay-3">
+        <div class="step-num">3</div>
+        <div class="step-title">Evaluate</div>
+        <div class="step-desc">Test on unseen data using metrics like accuracy, precision, or RMSE. Tune hyperparameters to close gaps.</div>
+      </div>
+      <div class="step reveal delay-4">
+        <div class="step-num">4</div>
+        <div class="step-title">Deploy &amp; Monitor</div>
+        <div class="step-desc">Serve predictions in production. Monitor for drift, retrain periodically as real-world distributions shift.</div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-counter">04 — 05</span>
+</section>
+
+<!-- =================================================================
+     SLIDE 5: REAL-WORLD IMPACT
+     ================================================================= -->
+<section class="slide slide-impact" data-index="4">
+  <div class="blob blob-gold" style="width:clamp(22rem,42vw,38rem);height:clamp(22rem,42vw,38rem);top:-15%;left:-5%;"></div>
+  <div class="blob blob-pink" style="width:clamp(16rem,30vw,26rem);height:clamp(16rem,30vw,26rem);bottom:-8%;right:0%;"></div>
+  <div class="v-line" style="left:clamp(2.5rem,6vw,6rem);"></div>
+  <div class="v-line" style="right:clamp(2.5rem,6vw,6rem);"></div>
+  <div class="slide-content">
+    <p class="eyebrow reveal">Applications</p>
+    <h2 class="reveal">ML in the <em>Real World</em></h2>
+    <div class="apps-grid">
+      <div class="app-item reveal delay-1">
+        <div class="app-domain">Healthcare</div>
+        <div class="app-desc">Detecting cancer in medical imaging with radiologist-level accuracy</div>
+      </div>
+      <div class="app-item reveal delay-2">
+        <div class="app-domain">Finance</div>
+        <div class="app-desc">Real-time fraud detection across billions of card transactions daily</div>
+      </div>
+      <div class="app-item reveal delay-3">
+        <div class="app-domain">Language</div>
+        <div class="app-desc">Translation, summarization, and voice assistants that understand context</div>
+      </div>
+      <div class="app-item reveal delay-4">
+        <div class="app-domain">Mobility</div>
+        <div class="app-desc">Perception systems that let autonomous vehicles navigate complex environments</div>
+      </div>
+      <div class="app-item reveal delay-5">
+        <div class="app-domain">Content</div>
+        <div class="app-desc">Recommendation engines that personalize feeds for billions of users</div>
+      </div>
+      <div class="app-item reveal delay-6">
+        <div class="app-domain">Science</div>
+        <div class="app-desc">Accelerating drug discovery and protein structure prediction</div>
+      </div>
+    </div>
+    <p class="closing-line reveal" style="transition-delay:0.82s !important;">The algorithm doesn't understand — it simply learns.</p>
+  </div>
+  <span class="slide-counter">05 — 05</span>
+</section>
+
+<script>
+/* === SLIDE PRESENTATION CONTROLLER ===
+   Handles keyboard, touch, scroll navigation + animations */
+class SlidePresentation {
+  constructor() {
+    this.slides       = Array.from(document.querySelectorAll('.slide'));
+    this.currentIndex = 0;
+    this.isScrolling  = false;
+    this.touchStartY  = 0;
+
+    this.progressBar     = document.getElementById('progressBar');
+    this.navDotsContainer = document.getElementById('navDots');
+
+    this.buildNavDots();
+    this.setupIntersectionObserver();
+    this.setupKeyboard();
+    this.setupTouch();
+    this.setupWheel();
+    this.updateProgress(0);
+  }
+
+  /* Build navigation dots — always clear first to avoid duplicates */
+  buildNavDots() {
+    this.navDotsContainer.innerHTML = '';
+    this.slides.forEach((_, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      btn.addEventListener('click', () => this.goTo(i));
+      this.navDotsContainer.appendChild(btn);
+    });
+  }
+
+  /* IntersectionObserver adds .visible to trigger CSS animations */
+  setupIntersectionObserver() {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            const idx = parseInt(entry.target.dataset.index);
+            this.currentIndex = idx;
+            this.updateProgress(idx);
+            this.updateDots(idx);
+          }
+        });
+      },
+      { threshold: 0.55 }
+    );
+    this.slides.forEach(slide => obs.observe(slide));
+  }
+
+  /* Keyboard: arrow keys, space, page up/down, home/end */
+  setupKeyboard() {
+    document.addEventListener('keydown', e => {
+      switch (e.key) {
+        case 'ArrowDown': case 'ArrowRight': case ' ':
+          e.preventDefault(); this.next(); break;
+        case 'ArrowUp': case 'ArrowLeft':
+          e.preventDefault(); this.prev(); break;
+        case 'PageDown': e.preventDefault(); this.next(); break;
+        case 'PageUp':   e.preventDefault(); this.prev(); break;
+        case 'Home': e.preventDefault(); this.goTo(0); break;
+        case 'End':  e.preventDefault(); this.goTo(this.slides.length - 1); break;
+      }
+    });
+  }
+
+  /* Touch/swipe support */
+  setupTouch() {
+    document.addEventListener('touchstart', e => {
+      this.touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+      const delta = this.touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(delta) > 40) {
+        delta > 0 ? this.next() : this.prev();
+      }
+    }, { passive: true });
+  }
+
+  /* Mouse wheel — throttled to one slide per scroll gesture */
+  setupWheel() {
+    let lastWheelTime = 0;
+    document.addEventListener('wheel', e => {
+      e.preventDefault();
+      const now = Date.now();
+      if (now - lastWheelTime < 800) return;
+      lastWheelTime = now;
+      e.deltaY > 0 ? this.next() : this.prev();
+    }, { passive: false });
+  }
+
+  next() { if (this.currentIndex < this.slides.length - 1) this.goTo(this.currentIndex + 1); }
+  prev() { if (this.currentIndex > 0) this.goTo(this.currentIndex - 1); }
+
+  goTo(index) {
+    this.slides[index].scrollIntoView({ behavior: 'smooth' });
+  }
+
+  updateProgress(index) {
+    const pct = this.slides.length > 1
+      ? (index / (this.slides.length - 1)) * 100
+      : 100;
+    this.progressBar.style.width = pct + '%';
+  }
+
+  updateDots(index) {
+    this.navDotsContainer.querySelectorAll('.nav-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+  }
+}
+
+new SlidePresentation();
+</script>
+</body>
+</html>
